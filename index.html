@@ -1,1 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes and Drawing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
 
+        canvas {
+            border: 1px solid #000;
+        }
+
+        #controls {
+            margin: 10px 0;
+        }
+
+        #noteContainer {
+            margin-top: 20px;
+        }
+
+        textarea {
+            width: 500px;
+            height: 150px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Take Notes and Draw</h1>
+
+    <canvas id="drawingCanvas" width="500" height="500"></canvas>
+    <div id="controls">
+        <button onclick="clearCanvas()">Clear Drawing</button>
+    </div>
+
+    <div id="noteContainer">
+        <h2>Notes</h2>
+        <textarea id="notesInput" placeholder="Write your notes here..."></textarea>
+    </div>
+
+    <div id="controls">
+        <button onclick="sendData()">Email Notes and Drawing</button>
+    </div>
+
+    <input type="email" id="emailInput" placeholder="Enter your email" />
+
+    <script>
+        // Drawing functionality
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        canvas.addEventListener('mousedown', () => isDrawing = true);
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+        canvas.addEventListener('mousemove', draw);
+
+        function draw(event) {
+            if (!isDrawing) return;
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'black';
+            ctx.beginPath();
+            ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            ctx.stroke();
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Email functionality
+        function sendData() {
+            const email = document.getElementById('emailInput').value;
+            const notes = document.getElementById('notesInput').value;
+
+            if (!email) {
+                alert('Please enter your email address.');
+                return;
+            }
+
+            const dataURL = canvas.toDataURL('image/jpeg');
+            fetch('https://your-backend-server.com/send-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    notes: notes,
+                    image: dataURL
+                })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      alert('Email sent successfully!');
+                  } else {
+                      alert('Failed to send email.');
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  alert('An error occurred.');
+              });
+        }
+    </script>
+</body>
+</html>
