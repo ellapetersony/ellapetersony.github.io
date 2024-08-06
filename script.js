@@ -42,3 +42,15 @@ app.post('/send-email', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
+fetch('http://localhost:3000/send-email', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        email: email,
+        notes: notes,
+        image: dataURL
+    })
+})
